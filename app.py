@@ -10,7 +10,7 @@ from . import app
 from utils import filters
 
 mollie = Mollie.API.Client()
-mollie.setApiKey('test_8cCM7RPcPudbb8t8dgCMV3SjQnmG5E')
+mollie.setApiKey('YOUR-MOLLIE-API-KEY-HERE')
 
 voucher_db = redis.StrictRedis('localhost')
 
