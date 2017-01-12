@@ -17,10 +17,6 @@ voucher_db = redis.StrictRedis('localhost')
 PAYWALL_VOUCHER_COOKIE = 'Paywall-Voucher'
 
 
-def gogo():
-    return "muhahaa"
-
-
 @app.errorhandler(401)
 def custom_401(error):
     return Response(
