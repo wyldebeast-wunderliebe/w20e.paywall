@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+
+<title>Voucher manager</title>
+
+<link
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
+    crossorigin="anonymous">
+<link
+    href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    rel="stylesheet"
+    integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+    crossorigin="anonymous">
+
+<div class="container-fluid">
+
+    <nav class="navbar sticky-top navbar-toggleable-md navbar-light bg-faded">
+        <a class="navbar-brand" href="#">Voucher manager</a>
+        <small>
+            <a href="buy_voucher"
+               class="btn btn-outline-success btn-sm"
+               role="button">
+                buy voucher
+            </a>
+            <a href="delete_voucher/all_expired"
+               class="btn btn-outline-danger btn-sm"
+               role="button">
+                delete all expired vouchers
+            </a>
+            {% if current_cookie %}
+            <a href="verify_voucher/{{current_cookie}}"
+               class="btn btn-outline-info btn-sm"
+               role="button">check voucher in cookie: {{ current_cookie }}</a>
+            {% endif %}
+        </small>
+    </nav>
+
+    <table class="table table-striped">
+        <tr>
+            <th>voucher code</th>
+            <th>payment id</th>
+            <th>status</th>
+            <th>expires</th>
+            <th>valid</th>
+            <th></th>
+        </tr>
+        {% for voucher_code in vouchers.keys() %}
+        {% if not voucher_code.startswith('_') %}
+        <tr>
+            <td><a href="verify_voucher/{{ voucher_code }}"
+                   class="btn btn-outline-info btn-sm" role="button">{{
+                voucher_code }}</a></td>
+            {% set voucher = vouchers.hgetall(voucher_code) %}
+            {% for attr in voucher %}
+            <td>{{ voucher[attr] }}</td>
+            {% endfor %}
+            <td>{{ voucher | is_valid }}</td>
+            <td>
+                <a href="delete_voucher/{{ voucher_code }}"
+                   class="btn btn-outline-danger btn-sm" role="button">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                </a>
+            </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </table>
+</div>
