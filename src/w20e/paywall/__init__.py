@@ -1,6 +1,8 @@
-import Flask
+from flask import Flask
 
-app = Flask(__name__, instance_relative_config=True)
+app = Flask(__name__, instance_relative_config=False)
 app.config.from_object('config')
-app.config.from_pyfile('config.py')
-
+try:
+    app.config.from_pyfile('config_overrides.py')
+except:
+    pass

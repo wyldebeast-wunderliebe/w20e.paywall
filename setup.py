@@ -36,7 +36,7 @@ setup(
     install_requires=reqs,
     entry_points="""
     [console_scripts]
-    flask-ctl = hello.script:run
+    # flask-ctl = w20e.paywall.app.py:run
 
     [paste.app_factory]
     main = hello.script:make_app

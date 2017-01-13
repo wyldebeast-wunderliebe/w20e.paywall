@@ -1,1 +1,2 @@
-DEBUG=True
+DEBUG = True
+MOLLIE_API_KEY = ''
