@@ -1,3 +1,28 @@
 # w20e.paywall
 
-January the 12th 2017 - WORK IN PROGRESS
+SETUP
+=====
+
+virtualenv
+----------
+    virtualenv VENV
+    . ./VENV/bin/activate
+    
+clone from git
+--------------
+    git clone https://github.com/wyldebeast-wunderliebe/w20e.paywall.git
+    
+build
+-----
+    cd w20.paywall
+    pip install zc.buildout
+    buildout -v
+    
+run
+---
+    export FLASK_APP=
+    
+config overrides
+----------------
+    touch src/w20e/paywall/config_overrides.py
+    
