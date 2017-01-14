@@ -1,7 +1,14 @@
 # w20e.paywall
 
-SETUP
-=====
+A proof of concept paywall mechanism using the online payment platform [Mollie](https://www.mollie.com/nl/).
+
+requirements
+------------
+
+* Flask
+* requests
+* redis
+* mollie-api-python
 
 virtualenv
 ----------
@@ -24,5 +31,20 @@ run
     
 config overrides
 ----------------
-    touch src/w20e/paywall/config_overrides.py
+    touch src/instance/config_overrides.py
     
+Use config_overides.py for environment specicic configuration adjustments.
+
+mod_wsgi snippet
+----------------
+
+    WSGIDaemonProcess paywall user=app-paywall-prd group=app-paywall-prd threads=5
+    WSGIScriptAlias / /opt/APPS/paywall/prd/w20e.paywall/parts/wsgiscript/paywall.wsgi
+
+    <Directory /opt/APPS/paywall/prd/w20e.paywall>
+        WSGIProcessGroup paywall
+        WSGIApplicationGroup %{GLOBAL}
+        Require all granted
+    </Directory>
+    
+The paywall.wsgi script was created by buildout.
