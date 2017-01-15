@@ -25,18 +25,20 @@ build
     pip install zc.buildout
     buildout -v
     
-run
----
-    export FLASK_APP=
+run on development
+------------------
+    export FLASK_APP=w20e/paywall/app.py
+    ./bin/flask run
     
 config overrides
 ----------------
+Use config_overides.py for environment specific configuration adjustments.
+
     touch src/instance/config_overrides.py
     
-Use config_overides.py for environment specicic configuration adjustments.
-
 mod_wsgi snippet
 ----------------
+The paywall.wsgi script gets created by buildout. Below a mod_wsgi snippet to get things going on Apache.
 
     WSGIDaemonProcess paywall user=app-paywall-prd group=app-paywall-prd threads=5
     WSGIScriptAlias / /opt/APPS/paywall/prd/w20e.paywall/parts/wsgiscript/paywall.wsgi
@@ -46,5 +48,4 @@ mod_wsgi snippet
         WSGIApplicationGroup %{GLOBAL}
         Require all granted
     </Directory>
-    
-The paywall.wsgi script was created by buildout.
+   
