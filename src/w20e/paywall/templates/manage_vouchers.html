@@ -20,10 +20,9 @@
                         if(data.redirect) {
                             window.location = data.redirect;
                         } else {
-                            $(this).addClass("alert-success");
-                            $(this).find("td:eq(2)").text(data.status);
-                            $(this).find("td:eq(3)").text(data.expires);
-                            $(this).find("td:eq(4)").text(data.count);
+                            $(this).find("td:eq(2)").text(data.status).addClass("alert-info");
+                            $(this).find("td:eq(3)").text(data.expires).addClass("alert-info");
+                            $(this).find("td:eq(4)").text(data.count).addClass("alert-info");
                         }
                     }
                 });
