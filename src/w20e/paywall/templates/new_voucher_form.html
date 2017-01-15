@@ -13,43 +13,49 @@
     integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
     crossorigin="anonymous">
 
-<div class="container-fluid">
-    <form method="POST", action="make_payment">
-        <fieldset class="form-group">
-            <legend>Voucher type</legend>
-            <div class="form-check">
-                <label class="form-check-label">
-                    <input type="radio" class="form-check-input"
-                           name="voucher_type" id="voucher_type1"
-                           value="0" checked>
-                    Expiration date
-                </label>
-            </div>
-            <div class="form-check">
-                <label class="form-check-label">
-                    <input type="radio" class="form-check-input"
-                           name="voucher_type" id="voucher_type1"
-                           value="1">
-                    100 visits
-                </label>
-            </div>
-            <div class="form-check disabled">
-                <label class="form-check-label">
-                    <input type="radio" class="form-check-input"
-                           name="voucher_type" id="voucher_type2"
-                           value="2" disabled>
-                    200 visits
-                </label>
-            </div>
-            <div class="form-check disabled">
-                <label class="form-check-label">
-                    <input type="radio" class="form-check-input"
-                           name="voucher_type" id="voucher_type3"
-                           value="3" disabled>
-                    300 visits
-                </label>
-            </div>
-        </fieldset>
-        <button type="submit" class="btn btn-outline-primary">Submit</button>
-    </form>
+<div class="container">
+    <div class="row justify-content-md-center">
+        <div class="col-12 col-md-auto">
+            <h1>Buy voucher</h1>
+            <form method="POST" action="make_payment">
+                <fieldset class="form-group">
+                    <legend>Voucher type</legend>
+                    <div class="form-check">
+                        <label class="form-check-label">
+                            <input type="radio" class="form-check-input"
+                                   name="voucher_type" id="voucher_type1"
+                                   value="0" checked>
+                            Expiration date
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <label class="form-check-label">
+                            <input type="radio" class="form-check-input"
+                                   name="voucher_type" id="voucher_type1"
+                                   value="1">
+                            100 visits
+                        </label>
+                    </div>
+                    <div class="form-check disabled">
+                        <label class="form-check-label">
+                            <input type="radio" class="form-check-input"
+                                   name="voucher_type" id="voucher_type2"
+                                   value="2" disabled>
+                            200 visits
+                        </label>
+                    </div>
+                    <div class="form-check disabled">
+                        <label class="form-check-label">
+                            <input type="radio" class="form-check-input"
+                                   name="voucher_type" id="voucher_type3"
+                                   value="3" disabled>
+                            300 visits
+                        </label>
+                    </div>
+                </fieldset>
+                <button type="submit" class="btn btn-outline-primary">Submit
+                </button>
+            </form>
+        </div>
+    </div>
 </div>

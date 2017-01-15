@@ -3,8 +3,10 @@ from datetime import datetime, timedelta
 
 import Mollie
 import redis
-from flask import Response, request, redirect, \
-    render_template, make_response
+from flask import json
+from flask import request, redirect, \
+    render_template, make_response, jsonify, Response
+from werkzeug.datastructures import Headers
 
 from . import app
 from utils import filters
@@ -95,7 +97,6 @@ def verify_voucher(voucher_code=None):
                 (expires - now).
                 total_seconds() / 60)
 
-            resp_body = 'VALID [%s minutes remaining]' % minutes_remaining
             resp_header = {'Minutes-Remaining': minutes_remaining}
 
         # number of visits voucher
@@ -104,7 +105,6 @@ def verify_voucher(voucher_code=None):
             count = int(voucher.get('count'))
             valid = count > 0
 
-            resp_body = 'VALID [%s visits left]' % count
             resp_header = {'Visits-Remaining': count - 1}
 
             voucher['count'] = count - 1
@@ -112,12 +112,21 @@ def verify_voucher(voucher_code=None):
 
         # a valid and paid voucher
         if valid and voucher.get('status') == 'paid':
-            resp = make_response(resp_body, 200, resp_header)
+
+            resp = make_response(json.dumps(voucher))
+            resp.headers = Headers(resp_header)
+            resp.mimetype = 'application/json'
             resp.set_cookie(PAYWALL_VOUCHER_COOKIE, voucher_code)
             return resp
 
     # invalid or no voucher. Redirect to new voucher screen
-    return redirect('/new_voucher')
+    if request.is_xhr:
+        data = {'redirect': '/new_voucher'}
+        resp = make_response(json.dumps(data))
+        resp.mimetype = 'application/json'
+        return resp
+    else:
+        return redirect('/new_voucher')
 
 
 @app.route('/webhook_verification/<string:voucher_code>',

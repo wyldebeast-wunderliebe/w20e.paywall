@@ -12,13 +12,40 @@
     rel="stylesheet"
     integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
     crossorigin="anonymous">
+<script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function() {
+        $(".btn-verify").on("click", function(event) {
+            event.preventDefault();
+            $.ajax({
+                url: $(this).attr("href"),
+                context: $("tr[data-voucher="+ $(this).attr("data-voucher-code") +"]"),
+                success: function (data) {
+                    if(data.redirect) {
+                        window.location = data.redirect;
+                    } else {
+                        $(this).addClass("alert-success");
+                        $(this).find("td:eq(2)").text(data.status);
+                        $(this).find("td:eq(3)").text(data.expires);
+                        $(this).find("td:eq(4)").text(data.count);
+                    }
+                }
+            });
+        })
+    });
+
+</script>
 
 <div class="container-fluid">
 
     <nav class="navbar sticky-top navbar-toggleable-md navbar-light bg-faded">
         <a class="navbar-brand" href="#">Voucher manager</a>
         <small>
-            <a href="buy_voucher"
+            <a href="new_voucher"
                class="btn btn-outline-success btn-sm"
                role="button">
                 buy voucher
@@ -29,8 +56,9 @@
                 delete all expired vouchers
             </a>
             {% if current_cookie %}
-            <a href="verify_voucher/{{current_cookie}}"
-               class="btn btn-outline-info btn-sm"
+            <a href="verify_voucher/{{ current_cookie }}"
+               data-voucher-code="{{ current_cookie }}"
+               class="btn btn-outline-info btn-sm btn-verify"
                role="button">check voucher in cookie: {{ current_cookie }}</a>
             {% endif %}
         </small>
@@ -48,9 +76,10 @@
         </tr>
         {% for voucher_code in vouchers.keys() %}
         {% if not voucher_code.startswith('_') %}
-        <tr>
+        <tr data-voucher={{ voucher_code }}>
             <td><a href="verify_voucher/{{ voucher_code }}"
-                   class="btn btn-outline-info btn-sm" role="button">{{
+                   data-voucher-code="{{ voucher_code }}"
+                   class="btn btn-outline-info btn-sm btn-verify" role="button">{{
                 voucher_code }}</a></td>
             {% set voucher = vouchers.hgetall(voucher_code) %}
             {% for attr in voucher %}

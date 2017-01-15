@@ -13,16 +13,24 @@
     integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
     crossorigin="anonymous">
 
-<div class="container-fluid">
-    <form method="POST" action="verify_voucher">
-        <div class="form-group">
-            <!--label for="voucher_code">Voucher code</label-->
-            <input type="text" class="form-control" id="voucher_code" name="voucher_code"
-                   aria-describedby="voucher_help" placeholder="Voucher code">
-            <small id="voucher_help" class="form-text text-muted">
-                Enter your voucher code
-            </small>
+<div class="container">
+    <div class="row justify-content-md-center">
+        <div class="col-12 col-md-auto">
+            <h1>Verify voucher</h1>
+            <form method="POST" action="verify_voucher">
+                <div class="form-group">
+                    <!--label for="voucher_code">Voucher code</label-->
+                    <input type="text" class="form-control" id="voucher_code"
+                           name="voucher_code"
+                           aria-describedby="voucher_help"
+                           placeholder="Voucher code">
+                    <small id="voucher_help" class="form-text text-muted">
+                        Enter your voucher code
+                    </small>
+                </div>
+                <button type="submit" class="btn btn-outline-primary">Submit
+                </button>
+            </form>
         </div>
-        <button type="submit" class="btn btn-outline-primary">Submit</button>
-    </form>
+    </div>
 </div>
