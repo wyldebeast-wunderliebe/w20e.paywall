@@ -46,13 +46,13 @@
             <a href="delete_voucher/all_expired"
                class="btn btn-outline-danger btn-sm"
                role="button">
-                delete all expired vouchers
+                delete all expired
             </a>
             {% if current_cookie %}
             <a href="verify_voucher/{{ current_cookie }}"
                data-voucher-code="{{ current_cookie }}"
                class="btn btn-outline-info btn-sm btn-verify"
-               role="button">check voucher in cookie: {{ current_cookie }}</a>
+               role="button">active voucher: {{ current_cookie }}</a>
             {% endif %}
         </small>
     </nav>
