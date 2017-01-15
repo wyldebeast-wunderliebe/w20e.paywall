@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import Mollie
 import redis
 from flask import Response, request, redirect, \
-    render_template
+    render_template, make_response
 
 from . import app
 from utils import filters
@@ -12,89 +12,130 @@ from utils import filters
 mollie = Mollie.API.Client()
 mollie.setApiKey(app.config.get('MOLLIE_API_KEY'))
 
-voucher_db = redis.StrictRedis('localhost')
+VOUCHER_DB = redis.StrictRedis(app.config.get('REDIS_HOST'))
+PAYWALL_VOUCHER_COOKIE = app.config.get('COOKIE_NAME')
 
-PAYWALL_VOUCHER_COOKIE = 'Paywall-Voucher'
-
-
-@app.errorhandler(401)
-def custom_401(error):
-    return Response(
-        'PAY UP PANCAKE!',
-        401,
-        {'Minutes-Remaining': '0'})
+VOUCHER_TYPES = {
+    '0': {'amount': 5.00, 'description': 'Paywall Expiration', 'count': 0},
+    '1': {'amount': 1.00, 'description': 'Paywall 100 visits', 'count': 100},
+    '2': {'amount': 2.00, 'description': 'Paywall 200 visits', 'count': 200},
+}
 
 
 @app.route('/')
-def index():
+def enter_voucher():
+
+    return render_template(
+        'enter_voucher_form.html'
+    )
+
+
+@app.route('/new_voucher')
+def new_voucher():
+
+    return render_template(
+        'new_voucher_form.html'
+    )
+
+
+@app.route('/manage_vouchers')
+def manage_vouchers():
+
     current_cookie = False
     if PAYWALL_VOUCHER_COOKIE in request.cookies:
         current_cookie = request.cookies.get(PAYWALL_VOUCHER_COOKIE)
 
     return render_template(
-        'vouchers.html',
-        vouchers=voucher_db,
+        'manage_vouchers.html',
+        vouchers=VOUCHER_DB,
         current_cookie=current_cookie
     )
 
 
 @app.route('/delete_voucher/<string:voucher_code>')
 def delete_voucher(voucher_code):
+
     if voucher_code == 'all_expired':
-        for vc in voucher_db.keys():
-            if not filters.is_valid(voucher_db.hgetall(vc)):
-                voucher_db.delete(vc)
+        for vc in VOUCHER_DB.keys():
+            if not filters.is_valid(VOUCHER_DB.hgetall(vc)):
+                VOUCHER_DB.delete(vc)
     else:
-        voucher_db.delete(voucher_code)
+        VOUCHER_DB.delete(voucher_code)
 
-    return redirect('/')
-
-
-@app.route('/buy_voucher')
-def buy_voucher():
-    return make_payment()
+    return redirect('/manage_vouchers')
 
 
-@app.route('/verify_voucher/<string:voucher_code>')
-def verify_voucher(voucher_code):
-    voucher = voucher_db.hgetall(voucher_code)
+@app.route('/verify_voucher', methods=['POST'])
+@app.route('/verify_voucher/<string:voucher_code>', methods=['GET'])
+def verify_voucher(voucher_code=None):
+
+    # check POST params
+    if not voucher_code:
+        voucher_code = request.form.get('voucher_code')
+
+    voucher = VOUCHER_DB.hgetall(voucher_code)
 
     if voucher:
-        now = datetime.now()
-        expires = datetime.strptime(
-            voucher.get('expires'),
-            "%Y-%m-%d %H:%M:%S.%f"
-        )
 
-        if voucher.get('status') == 'paid' and \
-                        now < expires:
-            resp = Response(
-                'VALID',
-                200,
-                {'Minutes-Remaining': str(
-                    (expires - now).
-                    total_seconds() / 60
-                )}
+        valid = False
+        resp_body = ""
+        resp_header = ""
+
+        # expiration voucher
+        if voucher.get('expires') != "None":
+
+            now = datetime.now()
+            expires = datetime.strptime(
+                voucher.get('expires'),
+                "%Y-%m-%d %H:%M:%S.%f"
             )
 
+            valid = now < expires
+            minutes_remaining = str(
+                (expires - now).
+                total_seconds() / 60)
+
+            resp_body = 'VALID [%s minutes remaining]' % minutes_remaining
+            resp_header = {'Minutes-Remaining': minutes_remaining}
+
+        # number of visits voucher
+        if voucher.get('count') != '0':
+
+            count = int(voucher.get('count'))
+            valid = count > 0
+
+            resp_body = 'VALID [%s visits left]' % count
+            resp_header = {'Visits-Remaining': count - 1}
+
+            voucher['count'] = count - 1
+            VOUCHER_DB.hmset(voucher_code, voucher)
+
+        # a valid and paid voucher
+        if valid and voucher.get('status') == 'paid':
+            resp = make_response(resp_body, 200, resp_header)
             resp.set_cookie(PAYWALL_VOUCHER_COOKIE, voucher_code)
             return resp
 
-    # invalid or no voucher, redirect to payment provider
-    return make_payment()
+    # invalid or no voucher. Redirect to new voucher screen
+    return redirect('/new_voucher')
 
 
 @app.route('/webhook_verification/<string:voucher_code>',
            methods=['GET', 'POST'])
 def webhook_verification(voucher_code):
-    try:
-        payment_id = voucher_db.hgetall(voucher_code).get('payment_id')
-        payment = mollie.payments.get(payment_id)
-        voucher_code = payment['metadata']['voucher_code']
 
-        voucher_db.hmset(voucher_code, {
+    try:
+        payment_id = VOUCHER_DB.hgetall(voucher_code).get('payment_id')
+        payment = mollie.payments.get(payment_id)
+        voucher_type = payment['metadata']['voucher_type']
+
+        expires = None
+        if voucher_type in ['0']:
+            expires = datetime.now() + timedelta(minutes=10)
+
+        VOUCHER_DB.hmset(voucher_code, {
             'payment_id': payment['id'],
-            'expires': datetime.now() + timedelta(minutes=10),
+            'expires': expires,
             'status': payment['status']
         })
 
@@ -111,25 +152,40 @@ def webhook_verification(voucher_code):
         return 'API call failed: ' + e.message
 
 
-def make_payment():
+@app.route('/make_payment', methods=['POST'])
+@app.route('/make_payment/<int:voucher_type>', methods=['POST', 'GET'])
+def make_payment(voucher_type=None):
+
+    # check POST params
+    if not voucher_type:
+        voucher_type = request.form.get('voucher_type')
+
     # TODO consider re-charging an old voucher code
     voucher_code = str(int(time.time()))
 
     payment = mollie.payments.create({
-        'amount': 1.00,
-        'description': 'Paywall Voucher',
-        'webhookUrl': request.url_root + 'webhook_verification/' + voucher_code,
+        'amount': VOUCHER_TYPES[voucher_type].get('amount'),
+        'description': VOUCHER_TYPES[voucher_type].get('description'),
+        'webhookUrl':
+            request.url_root +
+            'webhook_verification/%s' % voucher_code,
         'redirectUrl': request.url_root + 'verify_voucher/' + voucher_code,
         'metadata': {
-            'voucher_code': voucher_code
+            'voucher_code': voucher_code,
+            'voucher_type': voucher_type
         }
     })
 
+    expires = None
+    if voucher_type in ['0']:
+        expires = datetime.now()
+
     # create expired entry in database
-    voucher_db.hmset(voucher_code, {
+    VOUCHER_DB.hmset(voucher_code, {
         'payment_id': payment.get('id'),
-        'expires': datetime.now(),
-        'status': payment.get('status')
+        'expires': expires,
+        'status': payment.get('status'),
+        'count': VOUCHER_TYPES[voucher_type].get('count'),
     })
 
     return redirect(payment.getPaymentUrl())
