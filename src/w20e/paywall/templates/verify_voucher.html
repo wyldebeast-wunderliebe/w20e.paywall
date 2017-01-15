@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Enter voucher form{% endblock %}
+
+{% block content %}
+
+    <div class="row justify-content-md-center">
+        <div class="col-12 col-md-auto">
+
+            <div class="card">
+
+                <img class="card-img-top" src="{{ url_for('static', filename='carbon.png') }}" alt="Carbon image">
+
+                <div class="card-block">
+                    <h4 class="card-title">Verify voucher</h4>
+                    <p class="card-text">Check voucher validity</p>
+                </div>
+
+                <form method="POST" action="verify_voucher">
+                    <div class="form-group">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <input type="text" class="form-control" id="voucher_code"
+                                       name="voucher_code"
+                                       aria-describedby="voucher_help"
+                                       placeholder="Voucher code">
+                                <small id="voucher_help" class="form-text text-muted">
+                                    Enter your voucher code
+                                </small>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="card-block">
+                        <button type="submit"
+                                class="btn btn-outline-primary">
+                            Submit
+                        </button>
+                    </div>
+                </form>
+
+                <div class="card-footer text-muted">
+                    <small>https://github.com/wyldebeast-wunderliebe/w20e.paywall</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{%  endblock %}

@@ -1,0 +1,8 @@
+.container,
+.container-fluid {
+    margin-top: 10px;
+}
+
+.card-img-top {
+    height: 50px;
+}

@@ -1,46 +1,40 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
 
-<title>Voucher manager</title>
+{% block title %}Voucher manager{% endblock %}
 
-<link
-    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
-    rel="stylesheet"
-    integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
-    crossorigin="anonymous">
-<link
-    href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-    rel="stylesheet"
-    integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
-    crossorigin="anonymous">
-<script
-  src="https://code.jquery.com/jquery-3.1.1.min.js"
-  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-  crossorigin="anonymous"></script>
+{% block extra_js %}
 
-<script>
-    $(document).ready(function() {
-        $(".btn-verify").on("click", function(event) {
-            event.preventDefault();
-            $.ajax({
-                url: $(this).attr("href"),
-                context: $("tr[data-voucher="+ $(this).attr("data-voucher-code") +"]"),
-                success: function (data) {
-                    if(data.redirect) {
-                        window.location = data.redirect;
-                    } else {
-                        $(this).addClass("alert-success");
-                        $(this).find("td:eq(2)").text(data.status);
-                        $(this).find("td:eq(3)").text(data.expires);
-                        $(this).find("td:eq(4)").text(data.count);
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+            crossorigin="anonymous">
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            $(".btn-verify").on("click", function(event) {
+                event.preventDefault();
+                $.ajax({
+                    url: $(this).attr("href"),
+                    context: $("tr[data-voucher="+ $(this).attr("data-voucher-code") +"]"),
+                    success: function (data) {
+                        if(data.redirect) {
+                            window.location = data.redirect;
+                        } else {
+                            $(this).addClass("alert-success");
+                            $(this).find("td:eq(2)").text(data.status);
+                            $(this).find("td:eq(3)").text(data.expires);
+                            $(this).find("td:eq(4)").text(data.count);
+                        }
                     }
-                }
-            });
-        })
-    });
+                });
+            })
+        });
 
-</script>
+    </script>
 
-<div class="container-fluid">
+{% endblock %}
+
+{% block content %}
 
     <nav class="navbar sticky-top navbar-toggleable-md navbar-light bg-faded">
         <a class="navbar-brand" href="#">Voucher manager</a>
@@ -64,36 +58,38 @@
         </small>
     </nav>
 
-    <table class="table table-striped">
-        <tr>
-            <th>voucher code</th>
-            <th>payment id</th>
-            <th>status</th>
-            <th>expires</th>
-            <th>visits left</th>
-            <th>valid</th>
-            <th></th>
-        </tr>
-        {% for voucher_code in vouchers.keys() %}
-        {% if not voucher_code.startswith('_') %}
-        <tr data-voucher={{ voucher_code }}>
-            <td><a href="verify_voucher/{{ voucher_code }}"
-                   data-voucher-code="{{ voucher_code }}"
-                   class="btn btn-outline-info btn-sm btn-verify" role="button">{{
-                voucher_code }}</a></td>
-            {% set voucher = vouchers.hgetall(voucher_code) %}
-            {% for attr in voucher %}
-            <td>{{ voucher[attr] }}</td>
+    <div class="table-responsive">
+        <table class="table">
+            <tr>
+                <th>voucher code</th>
+                <th>payment id</th>
+                <th>status</th>
+                <th>expires</th>
+                <th>visits left</th>
+                <th>valid</th>
+                <th></th>
+            </tr>
+            {% for voucher_code in vouchers.keys() %}
+            {% if not voucher_code.startswith('_') %}
+            <tr data-voucher={{ voucher_code }}>
+                <td><a href="verify_voucher/{{ voucher_code }}"
+                       data-voucher-code="{{ voucher_code }}"
+                       class="btn btn-outline-info btn-sm btn-verify" role="button">{{
+                    voucher_code }}</a></td>
+                {% set voucher = vouchers.hgetall(voucher_code) %}
+                {% for attr in voucher %}
+                <td>{{ voucher[attr] in ['None', '0'] and '-' or voucher[attr] }}</td>
+                {% endfor %}
+                <td>{{ voucher | is_valid }}</td>
+                <td>
+                    <a href="delete_voucher/{{ voucher_code }}"
+                       class="btn btn-outline-danger btn-sm" role="button">
+                        <i class="fa fa-times" aria-hidden="true"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endif %}
             {% endfor %}
-            <td>{{ voucher | is_valid }}</td>
-            <td>
-                <a href="delete_voucher/{{ voucher_code }}"
-                   class="btn btn-outline-danger btn-sm" role="button">
-                    <i class="fa fa-times" aria-hidden="true"></i>
-                </a>
-            </td>
-        </tr>
-        {% endif %}
-        {% endfor %}
-    </table>
-</div>
+        </table>
+    </div>
+{% endblock %}

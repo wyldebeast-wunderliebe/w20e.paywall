@@ -28,7 +28,7 @@ VOUCHER_TYPES = {
 def enter_voucher():
 
     return render_template(
-        'enter_voucher_form.html'
+        'verify_voucher.html'
     )
 
 
@@ -36,7 +36,7 @@ def enter_voucher():
 def new_voucher():
 
     return render_template(
-        'new_voucher_form.html'
+        'new_voucher.html'
     )
 
 
