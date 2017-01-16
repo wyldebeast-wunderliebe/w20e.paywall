@@ -6,3 +6,7 @@
 .card-img-top {
     height: 50px;
 }
+
+.card-text {
+    max-width: 250px;
+}

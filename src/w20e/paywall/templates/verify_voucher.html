@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% import 'macros.html' as macros %}
+
 {% block title %}Enter voucher form{% endblock %}
 
 {% block content %}
@@ -42,9 +44,8 @@
                     </div>
                 </form>
 
-                <div class="card-footer text-muted">
-                    <small>https://github.com/wyldebeast-wunderliebe/w20e.paywall</small>
-                </div>
+                {{ macros.card_footer() }}
+
             </div>
         </div>
     </div>

@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% import 'macros.html' as macros %}
+
 {% block title %}New voucher form{% endblock %}
 
 {% block content %}
@@ -13,7 +15,9 @@
 
                 <div class="card-block">
                     <h4 class="card-title">Buy voucher</h4>
-                    <p class="card-text">Select which type of voucher you prefer.</p>
+                    <p class="card-text">
+                        You need a valid voucher to view the requested content. Please select a voucher type.
+                    </p>
                 </div>
 
                 <form method="POST" action="make_payment">
@@ -64,9 +68,8 @@
 
                 </form>
 
-                <div class="card-footer text-muted">
-                    <small>https://github.com/wyldebeast-wunderliebe/w20e.paywall</small>
-                </div>
+                {{ macros.card_footer() }}
+
             </div>
         </div>
     </div>
