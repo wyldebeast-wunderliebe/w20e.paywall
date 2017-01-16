@@ -60,12 +60,12 @@ routes
 ------
 For starters, you can navigate the following routes.
 <dl>
-  <dt>https<nolink>://88b7834a.ngrok.io/<strong>manage_vouchers</strong></dt>
+  <dt>[host]/<strong>manage_vouchers</strong></dt>
   <dd>Needs to be restricted in a production environment. Gives an overview of all active vouchers, both valid and not.</dd>
 
-  <dt>https://88b7834a.ngrok.io/<strong>test_voucher</strong></dt>
+  <dt>[host]//<strong>test_voucher</strong></dt>
   <dd>A verify-buy-redirect chain, roundtripping the entire paywall mechanism.</dd>
   
-  <dt>https://88b7834a.ngrok.io/<strong>new_voucher</strong></dt>
+  <dt>[host]//<strong>new_voucher</strong></dt>
   <dd>Buy a voucher using a predefined set of voucher types.</dd>
 </dl>
