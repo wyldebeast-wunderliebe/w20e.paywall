@@ -20,6 +20,7 @@
                         if(data.redirect) {
                             window.location = data.redirect;
                         } else {
+                            $("tr td.alert-info").each(function() { $(this).removeClass("alert-info")});
                             $(this).find("td:eq(2)").text(data.status).addClass("alert-info");
                             $(this).find("td:eq(3)").text(data.expires).addClass("alert-info");
                             $(this).find("td:eq(4)").text(data.count).addClass("alert-info");
@@ -53,12 +54,6 @@
                role="button">
                 delete invalid vouchers
             </a>
-            {% if current_cookie %}
-            <a href="verify_voucher/{{ current_cookie }}"
-               data-voucher-code="{{ current_cookie }}"
-               class="btn btn-outline-info btn-sm btn-verify"
-               role="button">active voucher: {{ current_cookie }}</a>
-            {% endif %}
         </small>
     </nav>
 
@@ -76,10 +71,7 @@
             {% for voucher_code in vouchers.keys() %}
             {% if not voucher_code.startswith('_') %}
             <tr data-voucher={{ voucher_code }}>
-                <td><a href="verify_voucher/{{ voucher_code }}"
-                       data-voucher-code="{{ voucher_code }}"
-                       class="btn btn-outline-info btn-sm btn-verify" role="button">{{
-                    voucher_code }}</a></td>
+                <td>{{ voucher_code }}</td>
                 {% set voucher = vouchers.hgetall(voucher_code) %}
                 <td>{{ voucher.get('payment_id') }}</td>
                 <td>{{ voucher.get('status') }}</td>
@@ -90,6 +82,11 @@
                     <a href="delete_voucher/{{ voucher_code }}"
                        class="btn btn-outline-danger btn-sm" role="button">
                         <i class="fa fa-times" aria-hidden="true"></i>
+                    </a>
+                    <a href="verify_voucher/{{ voucher_code }}"
+                       data-voucher-code="{{ voucher_code }}"
+                       class="btn btn-outline-info btn-sm btn-verify" role="button">
+                        <i class="fa fa-bolt" aria-hidden="true"></i>
                     </a>
                 </td>
             </tr>
