@@ -40,10 +40,26 @@ NOV_TYPES = [v for v in VOUCHER_TYPES.keys()
 
 
 @app.route('/')
+@app.route('/enter_voucher')
 def enter_voucher():
 
+    # check voucher code in cookie
+    voucher_code = request.cookies.get(PAYWALL_VOUCHER_COOKIE)
+    if voucher_code:
+        return redirect('/verify_voucher/%s?target=%s' %
+                        (voucher_code, request.args.get('target', '')))
+
     return render_template(
-        'verify_voucher.html'
+        'verify_voucher.html',
+        target=request.args.get('target', '')
+    )
+
+
+@app.route('/test_voucher')
+def test_voucher():
+
+    return render_template(
+        'test_voucher.html'
     )
 
 
@@ -54,7 +70,8 @@ def new_voucher():
         'new_voucher.html',
         exp_types=EXP_TYPES,
         nov_types=NOV_TYPES,
-        voucher_types=VOUCHER_TYPES
+        voucher_types=VOUCHER_TYPES,
+        target=request.args.get('target', '')
     )
 
 
@@ -130,9 +147,14 @@ def verify_voucher(voucher_code=None):
         # a valid and paid voucher
         if valid and voucher.get('status') == 'paid':
 
-            resp = make_response(json.dumps(voucher))
-            resp.headers = Headers(resp_header)
-            resp.mimetype = 'application/json'
+            target = request.args.get('target') or request.form.get('target')
+            if target:
+                resp = redirect(target)
+            else:
+                resp = make_response(json.dumps(voucher))
+                resp.headers = Headers(resp_header)
+                resp.mimetype = 'application/json'
+
             resp.set_cookie(PAYWALL_VOUCHER_COOKIE, voucher_code)
             return resp
 
@@ -143,7 +165,8 @@ def verify_voucher(voucher_code=None):
         resp.mimetype = 'application/json'
         return resp
     else:
-        return redirect('/new_voucher')
+        target = request.args.get('target') or request.form.get('target') or ''
+        return redirect('/new_voucher?target=%s' % target)
 
 
 @app.route('/webhook_verification/<string:voucher_code>',
@@ -202,10 +225,13 @@ def make_payment(voucher_type=None):
         'webhookUrl':
             request.url_root +
             'webhook_verification/%s' % voucher_code,
-        'redirectUrl': request.url_root + 'verify_voucher/' + voucher_code,
+        'redirectUrl': '%sverify_voucher/%s?target=%s' % (
+            request.url_root, voucher_code, request.form.get('target', '')
+        ),
         'metadata': {
             'voucher_code': voucher_code,
-            'voucher_type': voucher_type
+            'voucher_type': voucher_type,
+            'target': request.form.get('target', '')
         }
     })
 
