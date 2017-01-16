@@ -23,7 +23,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: JavaScript',
         'Programming Language :: Python',
-        'Framework :: Flask,
+        'Framework :: Flask',
     ],
     keywords="flask,mollie,payment,paywall",
     author="Wietze Helmantel",

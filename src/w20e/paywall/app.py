@@ -6,7 +6,7 @@ import redis
 from flask import abort
 from flask import json
 from flask import request, redirect, \
-    render_template, make_response, jsonify, Response
+    render_template, make_response
 from flask import session
 from werkzeug.datastructures import Headers
 
@@ -19,7 +19,7 @@ mollie.setApiKey(app.config.get('MOLLIE_API_KEY'))
 VOUCHER_DB = redis.StrictRedis(app.config.get('REDIS_HOST'))
 PAYWALL_VOUCHER_COOKIE = app.config.get('COOKIE_NAME')
 
-# TODO make TTW configurable
+# TODO make TTW configurable and store in DB
 VOUCHER_TYPES = {
     # expiration vouchers
     0: {'type': 1, 'amount': 2.50, 'description': '1 day access', 'days': 1},
