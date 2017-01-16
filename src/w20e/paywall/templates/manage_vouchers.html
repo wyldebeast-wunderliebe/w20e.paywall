@@ -82,11 +82,13 @@
                 <td>{{ voucher.get('count', '-') }}</td>
                 <td>{{ voucher | is_valid }}</td>
                 <td>
-                    <a href="delete_voucher/{{ voucher_code }}"
+                    <a title="Delete voucher"
+                       href="delete_voucher/{{ voucher_code }}"
                        class="btn btn-outline-danger btn-sm" role="button">
                         <i class="fa fa-times" aria-hidden="true"></i>
                     </a>
-                    <a href="verify_voucher/{{ voucher_code }}"
+                    <a title="Verify voucher"
+                       href="verify_voucher/{{ voucher_code }}"
                        data-voucher-code="{{ voucher_code }}"
                        class="btn btn-outline-info btn-sm btn-verify" role="button">
                         <i class="fa fa-bolt" aria-hidden="true"></i>
