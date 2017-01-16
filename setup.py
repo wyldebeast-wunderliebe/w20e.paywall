@@ -4,7 +4,7 @@ from pip.req import parse_requirements
 import os
 
 name = "w20e.paywall"
-version = "0.1"
+version = "1.0.0"
 
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
 install_reqs = parse_requirements('requirements.txt', session='hack')
@@ -22,13 +22,17 @@ setup(
     version=version,
     description="Paywall",
     long_description=read('README.md'),
-    # Get strings from http://www.python.org/pypi?%3Aaction=list_classifiers
-    classifiers=[],
-    keywords="",
-    author="",
-    author_email='',
-    url='',
-    license='',
+    classifiers=[
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: JavaScript',
+        'Programming Language :: Python',
+        'Framework :: Flask,
+    ],
+    keywords="flask,mollie,payment,paywall",
+    author="Wietze Helmantel",
+    author_email='helmantel@w20e.com',
+    url='http://wyldebeast-wunderliebe.com',
+    license='MIT',
     package_dir={'': 'src'},
     packages=find_packages('src'),
     include_package_data=True,
@@ -36,10 +40,5 @@ setup(
     install_requires=reqs,
     entry_points="""
     [console_scripts]
-    # flask-ctl = w20e.paywall.app.py:run
-
-    [paste.app_factory]
-    main = hello.script:make_app
-    debug = hello.script:make_debug
     """,
 )
