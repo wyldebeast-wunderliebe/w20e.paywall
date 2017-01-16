@@ -27,19 +27,23 @@ buildout
     pip install zc.buildout
     buildout -v
     
-run on development
+settings overrides
 ------------------
+Use settings_overides.py for environment specific configuration adjustments like MOLLIE_API_KEY, REDIS_HOST and CSRF_SECRET_KEY.
+
+    touch src/instance/settings_overrides.py
+
+fire up on development
+----------------------
     export FLASK_APP=src/w20e/paywall/app.py
     ./bin/flask run
     
-settings overrides
-------------------
-Use settings_overides.py for environment specific configuration adjustments.
+ngrok for localhost testing
+---------------------------
+Since Mollie needs to be able to reach your server (webhook_verification), you might consider using [ngrok](https://ngrok.com/) to create a secure tunnel to your localhost.
 
-    touch src/instance/settings_overrides.py
-    
-mod_wsgi snippet
-----------------
+fire up on production: mod_wsgi snippet
+---------------------------------------
 The paywall.wsgi script gets created by buildout. Below is a mod_wsgi snippet to 
 get things going on Apache.
 
@@ -51,4 +55,17 @@ get things going on Apache.
         WSGIApplicationGroup %{GLOBAL}
         Require all granted
     </Directory>
-   
+
+routes
+------
+For starters, you can navigate the following routes.
+<dl>
+  <dt>https<nolink>://88b7834a.ngrok.io/<strong>manage_vouchers</strong></dt>
+  <dd>Needs to be restricted in a production environment. Gives an overview of all active vouchers, both valid and not.</dd>
+
+  <dt>https://88b7834a.ngrok.io/<strong>test_voucher</strong></dt>
+  <dd>A verify-buy-redirect chain, roundtripping the entire paywall mechanism.</dd>
+  
+  <dt>https://88b7834a.ngrok.io/<strong>new_voucher</strong></dt>
+  <dd>Buy a voucher using a predefined set of voucher types.</dd>
+</dl>
