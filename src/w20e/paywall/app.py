@@ -17,11 +17,26 @@ mollie.setApiKey(app.config.get('MOLLIE_API_KEY'))
 VOUCHER_DB = redis.StrictRedis(app.config.get('REDIS_HOST'))
 PAYWALL_VOUCHER_COOKIE = app.config.get('COOKIE_NAME')
 
+# TODO make TTW configurable
 VOUCHER_TYPES = {
-    '0': {'amount': 5.00, 'description': 'Paywall Expiration', 'count': 0},
-    '1': {'amount': 1.00, 'description': 'Paywall 100 visits', 'count': 100},
-    '2': {'amount': 2.00, 'description': 'Paywall 200 visits', 'count': 200},
+    # expiration vouchers
+    0: {'type': 1, 'amount': 2.50, 'description': '1 day access', 'days': 1},
+    1: {'type': 1, 'amount': 4.50, 'description': '2 day access', 'days': 2},
+    2: {'type': 1, 'amount': 6.50, 'description': '3 day access', 'days': 3},
+
+    # nuber of visits vouchers
+    10: {'type': 2, 'amount': 1.00, 'description': '100 visits', 'count': 100},
+    20: {'type': 2, 'amount': 1.75, 'description': '200 visits', 'count': 200},
+    30: {'type': 2, 'amount': 2.50, 'description': '300 visits', 'count': 300},
 }
+
+# Which voucher types are expirable
+EXP_TYPES = [v for v in VOUCHER_TYPES.keys()
+             if VOUCHER_TYPES[v].get('type') == 1]
+
+# Which vouchers are limited by number of visits
+NOV_TYPES = [v for v in VOUCHER_TYPES.keys()
+             if VOUCHER_TYPES[v].get('type') == 2]
 
 
 @app.route('/')
@@ -36,7 +51,10 @@ def enter_voucher():
 def new_voucher():
 
     return render_template(
-        'new_voucher.html'
+        'new_voucher.html',
+        exp_types=EXP_TYPES,
+        nov_types=NOV_TYPES,
+        voucher_types=VOUCHER_TYPES
     )
 
 
@@ -80,11 +98,10 @@ def verify_voucher(voucher_code=None):
     if voucher:
 
         valid = False
-        resp_body = ""
         resp_header = ""
 
         # expiration voucher
-        if voucher.get('expires') != "None":
+        if voucher.get('expires'):
 
             now = datetime.now()
             expires = datetime.strptime(
@@ -100,7 +117,7 @@ def verify_voucher(voucher_code=None):
             resp_header = {'Minutes-Remaining': minutes_remaining}
 
         # number of visits voucher
-        if voucher.get('count') != '0':
+        if voucher.get('count'):
 
             count = int(voucher.get('count'))
             valid = count > 0
@@ -136,17 +153,24 @@ def webhook_verification(voucher_code):
     try:
         payment_id = VOUCHER_DB.hgetall(voucher_code).get('payment_id')
         payment = mollie.payments.get(payment_id)
-        voucher_type = payment['metadata']['voucher_type']
+        voucher_type = int(payment['metadata']['voucher_type'])
 
-        expires = None
-        if voucher_type in ['0']:
-            expires = datetime.now() + timedelta(minutes=10)
-
-        VOUCHER_DB.hmset(voucher_code, {
+        voucher = {
             'payment_id': payment['id'],
-            'expires': expires,
             'status': payment['status']
-        })
+        }
+
+        # set expiration date
+        if voucher_type in EXP_TYPES:
+            voucher['expires'] = \
+                datetime.now() + \
+                timedelta(days=VOUCHER_TYPES[voucher_type].get('days'))
+
+        # set number of visits
+        if voucher_type in NOV_TYPES:
+            voucher['count'] = VOUCHER_TYPES[voucher_type].get('count')
+
+        VOUCHER_DB.hmset(voucher_code, voucher)
 
         if payment.isPaid():
             return 'Paid'
@@ -167,7 +191,7 @@ def make_payment(voucher_type=None):
 
     # check POST params
     if not voucher_type:
-        voucher_type = request.form.get('voucher_type')
+        voucher_type = int(request.form.get('voucher_type'))
 
     # TODO consider re-charging an old voucher code
     voucher_code = str(int(time.time()))
@@ -185,16 +209,18 @@ def make_payment(voucher_type=None):
         }
     })
 
-    expires = None
-    if voucher_type in ['0']:
-        expires = datetime.now()
-
-    # create expired entry in database
-    VOUCHER_DB.hmset(voucher_code, {
+    voucher = {
         'payment_id': payment.get('id'),
-        'expires': expires,
         'status': payment.get('status'),
-        'count': VOUCHER_TYPES[voucher_type].get('count'),
-    })
+    }
+
+    if voucher_type in EXP_TYPES:
+        voucher['expires'] = datetime.now()
+
+    if voucher_type in NOV_TYPES:
+        voucher['count'] = 0
+
+    # create voucher entry in database
+    VOUCHER_DB.hmset(voucher_code, voucher)
 
     return redirect(payment.getPaymentUrl())

@@ -9,7 +9,7 @@ def is_valid(voucher):
     valid = False
     if voucher:
 
-        if "expires" in voucher and voucher.get("expires") != 'None':
+        if "expires" in voucher:
             now = datetime.now()
             expires = datetime.strptime(
                 voucher.get('expires'),
@@ -17,7 +17,7 @@ def is_valid(voucher):
             )
             valid = now < expires
 
-        if "count" in voucher and voucher.get("count") != '0':
+        if "count" in voucher and int(voucher.get("count")) > 0:
             valid = int(voucher.get("count")) > 0
 
     return valid

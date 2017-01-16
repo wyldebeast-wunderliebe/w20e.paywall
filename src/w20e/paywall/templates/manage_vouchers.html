@@ -76,9 +76,10 @@
                        class="btn btn-outline-info btn-sm btn-verify" role="button">{{
                     voucher_code }}</a></td>
                 {% set voucher = vouchers.hgetall(voucher_code) %}
-                {% for attr in voucher %}
-                <td>{{ voucher[attr] in ['None', '0'] and '-' or voucher[attr] }}</td>
-                {% endfor %}
+                <td>{{ voucher.get('payment_id') }}</td>
+                <td>{{ voucher.get('status') }}</td>
+                <td>{{ voucher.get('expires', '-') }}</td>
+                <td>{{ voucher.get('count', '-') }}</td>
                 <td>{{ voucher | is_valid }}</td>
                 <td>
                     <a href="delete_voucher/{{ voucher_code }}"

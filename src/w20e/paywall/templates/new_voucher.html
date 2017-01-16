@@ -19,55 +19,36 @@
                 <form method="POST" action="make_payment">
                     <fieldset class="form-group">
                         <ul class="list-group list-group-flush">
-                            <li class="list-group-item">
-                                <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input type="radio"
-                                               class="form-check-input"
-                                               name="voucher_type"
-                                               id="voucher_type1"
-                                               value="0" checked>
-                                        Expiration date
-                                    </label>
-                                </div>
-                            </li>
-                            <li class="list-group-item">
-                                <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input type="radio"
-                                               class="form-check-input"
-                                               name="voucher_type"
-                                               id="voucher_type1"
-                                               value="1">
-                                        100 visits
-                                    </label>
-                                </div>
-                            </li>
 
-                            <li class="list-group-item">
-                                <div class="form-check disabled">
-                                    <label class="form-check-label">
-                                        <input type="radio"
-                                               class="form-check-input"
-                                               name="voucher_type"
-                                               id="voucher_type2"
-                                               value="2" disabled>
-                                        200 visits
-                                    </label>
-                                </div>
-                            </li>
-                            <li class="list-group-item">
-                                <div class="form-check disabled">
-                                    <label class="form-check-label">
-                                        <input type="radio"
-                                               class="form-check-input"
-                                               name="voucher_type"
-                                               id="voucher_type3"
-                                               value="3" disabled>
-                                        300 visits
-                                    </label>
-                                </div>
-                            </li>
+                            {% for type in exp_types %}
+                                <li class="list-group-item">
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input type="radio"
+                                                   class="form-check-input"
+                                                   name="voucher_type"
+                                                   id="voucher_type{{ type }}"
+                                                   value="{{ type }}">
+                                            {{ voucher_types[type].description }}
+                                        </label>
+                                    </div>
+                                </li>
+                            {% endfor %}
+
+                            {% for type in nov_types %}
+                                <li class="list-group-item">
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input type="radio"
+                                                   class="form-check-input"
+                                                   name="voucher_type"
+                                                   id="voucher_type{{ type }}"
+                                                   value="{{ type }}">
+                                            {{ voucher_types[type].description }}
+                                        </label>
+                                    </div>
+                                </li>
+                            {% endfor %}
                         </ul>
                     </fieldset>
 
