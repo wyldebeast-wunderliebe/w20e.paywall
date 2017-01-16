@@ -8,14 +8,19 @@
 
     <div class="row justify-content-md-center">
         <div class="col-12 col-md-auto">
-
             <div class="card">
 
                 <img class="card-img-top" src="{{ url_for('static', filename='carbon.png') }}" alt="Carbon image">
 
                 <div class="card-block">
                     <h4 class="card-title">Test voucher</h4>
-                    <p class="card-text">Give a user the opportunity to enter their voucher code or redirect instantly when the current voucher is valid.</p>
+                    <p class="card-text">
+                        <small>
+                            Give a user the opportunity to enter their voucher
+                            code or redirect instantly when the current voucher
+                            is valid.
+                        </small>
+                    </p>
                 </div>
 
                 <div class="card-block">
@@ -25,6 +30,10 @@
                 {{ macros.card_footer() }}
 
             </div>
+
+            {{ macros.empty_rows(1) }}
+
+            {{ macros.current_voucher(voucher) }}
         </div>
     </div>
 

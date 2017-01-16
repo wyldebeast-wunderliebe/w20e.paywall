@@ -20,6 +20,8 @@
 
                 <form method="POST" action="verify_voucher">
 
+                    {{ macros.csrf() }}
+
                     <input type="hidden" name="target" value="{{ target }}"/>
 
                     <div class="form-group">
@@ -41,6 +43,9 @@
                                 class="btn btn-outline-primary">
                             Submit
                         </button>
+                        <a href="{{ url_for('new_voucher') }}"
+                           class="btn btn-primary"
+                           role="button">New voucher</a>
                     </div>
                 </form>
 

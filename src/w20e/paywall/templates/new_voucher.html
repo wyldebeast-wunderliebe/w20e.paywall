@@ -22,6 +22,8 @@
 
                 <form method="POST" action="make_payment">
 
+                    {{ macros.csrf() }}
+
                     <input type="hidden" name="target" value="{{ target }}"/>
 
                     <fieldset class="form-group">

@@ -3,9 +3,11 @@ from datetime import datetime, timedelta
 
 import Mollie
 import redis
+from flask import abort
 from flask import json
 from flask import request, redirect, \
     render_template, make_response, jsonify, Response
+from flask import session
 from werkzeug.datastructures import Headers
 
 from . import app
@@ -58,8 +60,15 @@ def enter_voucher():
 @app.route('/test_voucher')
 def test_voucher():
 
+    voucher_code = request.cookies.get(PAYWALL_VOUCHER_COOKIE, '')
+    voucher = VOUCHER_DB.hgetall(voucher_code)
+
+    if voucher:
+        voucher['voucher_code'] = voucher_code
+
     return render_template(
-        'test_voucher.html'
+        'test_voucher.html',
+        voucher=voucher
     )
 
 
@@ -244,9 +253,33 @@ def make_payment(voucher_type=None):
         voucher['expires'] = datetime.now()
 
     if voucher_type in NOV_TYPES:
-        voucher['count'] = 0
+        voucher['count'] = 10
 
     # create voucher entry in database
     VOUCHER_DB.hmset(voucher_code, voucher)
 
     return redirect(payment.getPaymentUrl())
+
+
+#####
+# CSRF Protection. Snippet taken from http://flask.pocoo.org/snippets/3/ and
+# slighly adjusted to suit our needs.
+#####
+
+@app.before_request
+def csrf_protect():
+
+    if request.method == "POST" and request.endpoint \
+            not in ['webhook_verification']:
+
+        token = session.pop('_csrf_token', None)
+        if not token or token != request.form.get('_csrf_token'):
+            abort(403)
+
+
+def generate_csrf_token():
+    if '_csrf_token' not in session:
+        session['_csrf_token'] = app.config.get('CSRF_SECRET_KEY')
+    return session['_csrf_token']
+
+app.jinja_env.globals['csrf_token'] = generate_csrf_token
