@@ -38,9 +38,11 @@ fire up on development
     export FLASK_APP=src/w20e/paywall/app.py
     ./bin/flask run
     
-ngrok for localhost testing
+ngrok or serveo for localhost testing
 ---------------------------
-Since Mollie needs to be able to reach your server (webhook_verification), you might consider using [ngrok](https://ngrok.com/) to create a secure tunnel to your localhost.
+Since Mollie needs to be able to reach your server (webhook_verification), you might consider using [ngrok](https://ngrok.com/) or serveo to create a secure tunnel to your localhost.
+
+    Serveo example: ssh -R 80:localhost:5000 serveo.net
 
 fire up on production: mod_wsgi snippet
 ---------------------------------------

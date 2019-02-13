@@ -1,7 +1,8 @@
 import time
 from datetime import datetime, timedelta
 
-import Mollie
+from mollie.api.client import Client
+from mollie.api.error import Error as MollieApiError
 import redis
 from flask import abort
 from flask import json
@@ -11,25 +12,26 @@ from flask import session
 from werkzeug.datastructures import Headers
 
 from . import app
-from utils import filters
+from .utils import filters
 
-mollie = Mollie.API.Client()
-mollie.setApiKey(app.config.get('MOLLIE_API_KEY'))
+mollie = Client()
+mollie.set_api_key(app.config.get('MOLLIE_API_KEY'))
 
-VOUCHER_DB = redis.StrictRedis(app.config.get('REDIS_HOST'))
+VOUCHER_DB = redis.StrictRedis(app.config.get(
+    'REDIS_HOST'), charset="utf-8", decode_responses=True)
 PAYWALL_VOUCHER_COOKIE = app.config.get('COOKIE_NAME')
 
 # TODO make TTW configurable and store in DB
 VOUCHER_TYPES = {
     # expiration vouchers
-    0: {'type': 1, 'amount': 2.50, 'description': '1 day access', 'days': 1},
-    1: {'type': 1, 'amount': 4.50, 'description': '2 day access', 'days': 2},
-    2: {'type': 1, 'amount': 6.50, 'description': '3 day access', 'days': 3},
+    0: {'type': 1, 'amount': '2.50', 'description': '1 day access', 'days': 1},
+    1: {'type': 1, 'amount': '4.50', 'description': '2 day access', 'days': 2},
+    2: {'type': 1, 'amount': '6.50', 'description': '3 day access', 'days': 3},
 
     # nuber of visits vouchers
-    10: {'type': 2, 'amount': 1.00, 'description': '100 visits', 'count': 100},
-    20: {'type': 2, 'amount': 1.75, 'description': '200 visits', 'count': 200},
-    30: {'type': 2, 'amount': 2.50, 'description': '300 visits', 'count': 300},
+    10: {'type': 2, 'amount': '1.00', 'description': '100 visits', 'count': 100},
+    20: {'type': 2, 'amount': '1.75', 'description': '200 visits', 'count': 200},
+    30: {'type': 2, 'amount': '2.50', 'description': '300 visits', 'count': 300},
 }
 
 # Which voucher types are expirable
@@ -197,8 +199,8 @@ def webhook_verification(voucher_code):
         # set expiration date
         if voucher_type in EXP_TYPES:
             voucher['expires'] = \
-                datetime.now() + \
-                timedelta(days=VOUCHER_TYPES[voucher_type].get('days'))
+                str(datetime.now() +
+                    timedelta(days=VOUCHER_TYPES[voucher_type].get('days')))
 
         # set number of visits
         if voucher_type in NOV_TYPES:
@@ -206,16 +208,16 @@ def webhook_verification(voucher_code):
 
         VOUCHER_DB.hmset(voucher_code, voucher)
 
-        if payment.isPaid():
+        if payment.is_paid():
             return 'Paid'
-        elif payment.isPending():
+        elif payment.is_pending():
             return 'Pending'
-        elif payment.isOpen():
+        elif payment.is_open():
             return 'Open'
         else:
             return 'Cancelled'
 
-    except Mollie.API.Error as e:
+    except MollieApiError as e:
         return 'API call failed: ' + e.message
 
 
@@ -231,7 +233,10 @@ def make_payment(voucher_type=None):
     voucher_code = str(int(time.time()))
 
     payment = mollie.payments.create({
-        'amount': VOUCHER_TYPES[voucher_type].get('amount'),
+        'amount': {
+            'currency': 'EUR',
+            'value': VOUCHER_TYPES[voucher_type].get('amount'),
+        },
         'description': VOUCHER_TYPES[voucher_type].get('description'),
         'webhookUrl':
             request.url_root +
@@ -252,7 +257,7 @@ def make_payment(voucher_type=None):
     }
 
     if voucher_type in EXP_TYPES:
-        voucher['expires'] = datetime.now()
+        voucher['expires'] = str(datetime.now())
 
     if voucher_type in NOV_TYPES:
         voucher['count'] = 10
@@ -260,7 +265,7 @@ def make_payment(voucher_type=None):
     # create voucher entry in database
     VOUCHER_DB.hmset(voucher_code, voucher)
 
-    return redirect(payment.getPaymentUrl())
+    return redirect(payment.checkout_url)
 
 
 #####
@@ -283,5 +288,6 @@ def generate_csrf_token():
     if '_csrf_token' not in session:
         session['_csrf_token'] = app.config.get('CSRF_SECRET_KEY')
     return session['_csrf_token']
+
 
 app.jinja_env.globals['csrf_token'] = generate_csrf_token

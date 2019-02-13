@@ -4,99 +4,90 @@
 
 {% block extra_js %}
 
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js"
-            integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-            crossorigin="anonymous">
-    </script>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+    crossorigin="anonymous">
+</script>
 
-    <script>
-        $(document).ready(function() {
-            $(".btn-verify").on("click", function(event) {
-                event.preventDefault();
-                $.ajax({
-                    url: $(this).attr("href"),
-                    context: $("tr[data-voucher="+ $(this).attr("data-voucher-code") +"]"),
-                    success: function (data) {
-                        if(data.redirect) {
-                            window.location = data.redirect;
-                        } else {
-                            $("tr td.alert-info").each(function() { $(this).removeClass("alert-info")});
-                            $(this).find("td:eq(2)").text(data.status).addClass("alert-info");
-                            $(this).find("td:eq(3)").text(data.expires).addClass("alert-info");
-                            $(this).find("td:eq(4)").text(data.count).addClass("alert-info");
-                        }
+<script>
+    $(document).ready(function () {
+        $(".btn-verify").on("click", function (event) {
+            event.preventDefault();
+            $.ajax({
+                url: $(this).attr("href"),
+                context: $("tr[data-voucher=" + $(this).attr("data-voucher-code") + "]"),
+                success: function (data) {
+                    if (data.redirect) {
+                        window.location = data.redirect;
+                    } else {
+                        $("tr td.alert-info").each(function () {
+                            $(this).removeClass("alert-info")
+                        });
+                        $(this).find("td:eq(2)").text(data.status).addClass("alert-info");
+                        $(this).find("td:eq(3)").text(data.expires).addClass("alert-info");
+                        $(this).find("td:eq(4)").text(data.count).addClass("alert-info");
                     }
-                });
-            })
-        });
-
-    </script>
+                }
+            });
+        })
+    });
+</script>
 
 {% endblock %}
 
 {% block content %}
 
-    <nav class="navbar sticky-top navbar-toggleable-md navbar-light bg-faded">
-        <a class="navbar-brand" href="#">Voucher manager</a>
-        <small class="mr-auto">
-            <a href="test_voucher"
-               class="btn btn-outline-info btn-sm"
-               role="button">
-                test voucher
-            </a>
-            <a href="new_voucher"
-               class="btn btn-outline-success btn-sm"
-               role="button">
-                buy voucher
-            </a>
-            <a href="delete_voucher/all_expired"
-               class="btn btn-outline-danger btn-sm"
-               role="button">
-                delete invalid vouchers
-            </a>
-        </small>
-        <span class="navbar-text text-danger">
-            Needs authentication in a production environment!
-        </span>
-    </nav>
+<nav class="navbar sticky-top navbar-toggleable-md navbar-light bg-faded">
+    <a class="navbar-brand" href="#">Voucher manager</a>
+    <small class="mr-auto">
+        <a href="test_voucher" class="btn btn-outline-info btn-sm" role="button">
+            test voucher
+        </a>
+        <a href="new_voucher" class="btn btn-outline-success btn-sm" role="button">
+            buy voucher
+        </a>
+        <a href="delete_voucher/all_expired" class="btn btn-outline-danger btn-sm" role="button">
+            delete invalid vouchers
+        </a>
+    </small>
+    <span class="navbar-text text-danger">
+        Needs authentication in a production environment!
+    </span>
+</nav>
 
-    <div class="table-responsive">
-        <table class="table">
-            <tr>
-                <th>voucher code</th>
-                <th>payment id</th>
-                <th>status</th>
-                <th>expires</th>
-                <th>visits left</th>
-                <th>valid</th>
-                <th></th>
-            </tr>
-            {% for voucher_code in vouchers.keys() %}
-            {% if not voucher_code.startswith('_') %}
-            <tr data-voucher={{ voucher_code }}>
-                <td>{{ voucher_code }}</td>
-                {% set voucher = vouchers.hgetall(voucher_code) %}
-                <td>{{ voucher.get('payment_id') }}</td>
-                <td>{{ voucher.get('status') }}</td>
-                <td>{{ voucher.get('expires', '-') }}</td>
-                <td>{{ voucher.get('count', '-') }}</td>
-                <td>{{ voucher | is_valid }}</td>
-                <td>
-                    <a title="Delete voucher"
-                       href="delete_voucher/{{ voucher_code }}"
-                       class="btn btn-outline-danger btn-sm" role="button">
-                        <i class="fa fa-times" aria-hidden="true"></i>
-                    </a>
-                    <a title="Verify voucher"
-                       href="verify_voucher/{{ voucher_code }}"
-                       data-voucher-code="{{ voucher_code }}"
-                       class="btn btn-outline-info btn-sm btn-verify" role="button">
-                        <i class="fa fa-bolt" aria-hidden="true"></i>
-                    </a>
-                </td>
-            </tr>
-            {% endif %}
-            {% endfor %}
-        </table>
-    </div>
+<div class="table-responsive">
+    <table class="table">
+        <tr>
+            <th>voucher code</th>
+            <th>payment id</th>
+            <th>status</th>
+            <th>expires</th>
+            <th>visits left</th>
+            <th>valid</th>
+            <th></th>
+        </tr>
+        {% for voucher_code in vouchers.keys() %}
+        {% if not voucher_code.startswith('_') %}
+        <tr data-voucher={{ voucher_code }}>
+            <td>{{ voucher_code }}</td>
+            {% set voucher = vouchers.hgetall(voucher_code) %}
+            <td>{{ voucher.get('payment_id') }}</td>
+            <td>{{ voucher.get('status') }}</td>
+            <td>{{ voucher.get('expires', '-') }}</td>
+            <td>{{ voucher.get('count', '-') }}</td>
+            <td>{{ voucher | is_valid }}</td>
+            <td>
+                <a title="Delete voucher" href="delete_voucher/{{ voucher_code }}" class="btn btn-outline-danger btn-sm"
+                    role="button">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                </a>
+                <a title="Verify voucher" href="verify_voucher/{{ voucher_code }}" data-voucher-code="{{ voucher_code }}"
+                    class="btn btn-outline-info btn-sm btn-verify" role="button">
+                    <i class="fa fa-bolt" aria-hidden="true"></i>
+                </a>
+            </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </table>
+</div>
 {% endblock %}
