@@ -6,35 +6,35 @@
 
 {% block content %}
 
-    <div class="row justify-content-md-center">
-        <div class="col-12 col-md-auto">
-            <div class="card">
+<div class="row justify-content-md-center">
+    <div class="col-12 col-md-auto">
+        <div class="card">
 
-                <img class="card-img-top" src="{{ url_for('static', filename='carbon.png') }}" alt="Carbon image">
+            <img class="card-img-top" src="{{ url_for('static', filename='carbon.png') }}" alt="Carbon image">
 
-                <div class="card-block">
-                    <h4 class="card-title">Test voucher</h4>
-                    <p class="card-text">
-                        <small>
-                            Give a user the opportunity to enter their voucher
-                            code or redirect instantly when the current voucher
-                            is valid.
-                        </small>
-                    </p>
-                </div>
-
-                <div class="card-block">
-                    <a href="{{ url_for('enter_voucher', target='https://wyldebeast-wunderliebe.com') }}">https://wyldebeast-wunderliebe.com</a>
-                </div>
-
-                {{ macros.card_footer() }}
-
+            <div class="card-block">
+                <h4 class="card-title">Test voucher</h4>
+                <p class="card-text">
+                    <small>
+                        Give a user the opportunity to enter their voucher
+                        code or redirect instantly when the current voucher
+                        is valid.
+                    </small>
+                </p>
             </div>
 
-            {{ macros.empty_rows(1) }}
+            <div class="card-block">
+                <a href="{{ url_for('enter_voucher', target='https://turftorr.nl') }}">https://turftorr.nl</a>
+            </div>
 
-            {{ macros.current_voucher(voucher) }}
+            {{ macros.card_footer() }}
+
         </div>
-    </div>
 
-{%  endblock %}
+        {{ macros.empty_rows(1) }}
+
+        {{ macros.current_voucher(voucher) }}
+    </div>
+</div>
+
+{% endblock %}

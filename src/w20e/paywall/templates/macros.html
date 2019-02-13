@@ -1,36 +1,39 @@
-{%  macro card_footer() %}
-    <div class="card-footer text-muted">
-        <small>Powered by <a href="https://github.com/wyldebeast-wunderliebe/w20e.paywall">w20e.paywall</a></small>
-    </div>
+{% macro card_footer() %}
+<div class="card-footer text-muted">
+    <small>Powered by <a href="https://github.com/wyldebeast-wunderliebe/w20e.paywall">w20e.paywall</a></small>
+</div>
 {% endmacro %}
 
 
 {% macro csrf() %}
-    <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+<input name=_csrf_token type=hidden value="{{ csrf_token() }}">
 {% endmacro %}
 
 
 {% macro current_voucher(voucher) %}
-    {% if voucher %}
-        <div class="card">
-            <div class="card-block">
-                <h4 class="card-title">Current voucher</h4>
-                <p class="card-text"><small>This information is taken from your Paywal Voucher cookie.</small> </p>
-            </div>
-            <div class="card-block">
-                <table class="table table-striped table-sm">
-                    {% for attr in voucher %}
-                    <tr><th>{{ attr }}</th><td>{{ voucher[attr] }}</td></tr>
-                    {% endfor %}
-                </table>
-            </div>
-        </div>
-    {% endif %}
+{% if voucher %}
+<div class="card">
+    <div class="card-block">
+        <h4 class="card-title">Currently active voucher</h4>
+        <p class="card-text"><small>This information is taken from your Paywal Voucher cookie.</small> </p>
+    </div>
+    <div class="card-block">
+        <table class="table table-striped table-sm">
+            {% for attr in voucher %}
+            <tr>
+                <th>{{ attr }}</th>
+                <td>{{ voucher[attr] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endif %}
 {% endmacro %}
 
 
 {% macro empty_rows(count) %}
-    {% for c in range(count) %}
-        <div class="row">&nbsp;</div>
-    {% endfor %}
+{% for c in range(count) %}
+<div class="row">&nbsp;</div>
+{% endfor %}
 {% endmacro %}
