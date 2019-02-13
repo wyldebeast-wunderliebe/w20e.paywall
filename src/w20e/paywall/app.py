@@ -47,13 +47,15 @@ def enter_voucher():
 
     # check voucher code in cookie
     voucher_code = request.cookies.get(PAYWALL_VOUCHER_COOKIE)
+    target = request.headers.get('X-TARGET') or request.args.get('target', '')
+
     if voucher_code:
         return redirect('/verify_voucher/%s?target=%s' %
-                        (voucher_code, request.args.get('target', '')))
+                        (voucher_code, target))
 
     return render_template(
         'verify_voucher.html',
-        target=request.args.get('target', '')
+        target=target
     )
 
 
